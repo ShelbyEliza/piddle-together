@@ -12,6 +12,7 @@ import Login from "./pages/login/Login";
 import Signup from "./pages/signup/Signup";
 import Project from "./pages/project/Project";
 import Sidebar from "./components/Sidebar";
+import OnlineUsers from "./components/OnlineUsers";
 
 function App() {
   const { user, authIsReady } = useAuthContext();
@@ -21,7 +22,7 @@ function App() {
       {/* wrap in authIsReady so the app doesn't load only links until we determine login status */}
       {authIsReady && (
         <BrowserRouter>
-          <Sidebar />
+          {user && <Sidebar />}
           <div className="container">
             <Navbar />
             <Switch>
@@ -33,20 +34,24 @@ function App() {
                 {!user && <Redirect to="/login" />}
                 {user && <Create />}
               </Route>
+              <Route path="/projects/:id">
+                {user && <Project />}
+                {!user && <Redirect to="/login" />}
+              </Route>
               <Route path="/login">
-                <Login />
+                {!user && <Login />}
+                {user && <Redirect to="/" />}
               </Route>
               <Route path="/signup">
-                <Signup />
-              </Route>
-              <Route path="/projects/:id">
-                <Project />
+                {!user && <Signup />}
+                {user && <Redirect to="/" />}
               </Route>
               <Route path="*">
                 <Redirect to="/" />
               </Route>
             </Switch>
           </div>
+          {user && <OnlineUsers />}
         </BrowserRouter>
       )}
     </div>
