@@ -17,12 +17,12 @@
   font-weight: bold;
   text-align: center;
   letter-spacing: 1px;
-  padding: 40px 30px;
+  padding: 20px 15px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 .sidebar .links {
   margin-top: 80px;
-  margin-left: 20px;
+  margin-left: 8px;
 }
 .sidebar .links li {
   margin-top: 10px;
@@ -30,14 +30,14 @@
 .sidebar .links a {
   /* flex - lets the image & span sit next to each other */
   display: flex;
-  padding: 10px;
+  padding: 8px;
   text-decoration: none;
   width: 100%;
   color: #fff;
   box-sizing: border-box;
 }
 .sidebar .links img {
-  margin-right: 10px;
+  margin-right: 6px;
   filter: invert(100%);
 }
 .sidebar .links a.active {

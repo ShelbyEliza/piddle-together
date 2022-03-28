@@ -1,6 +1,6 @@
 .user-list {
   width: 200px;
-  min-width: 250px;
+  min-width: 200px;
 
   box-sizing: border-box;
   background: #fbfbfb;
@@ -15,7 +15,9 @@
   font-size: 1.2em;
 }
 .user-list .user-list-item {
-  padding-right: 20px;
+  font-size: 0.8em;
+  padding-right: 6px;
+  padding-left: 6px;
   text-align: right;
   display: flex;
   justify-content: flex-end;
@@ -23,7 +25,7 @@
   margin: 15px auto;
 }
 .user-list .avatar {
-  margin-left: 10px;
+  margin-left: 6px;
   width: 40px;
   height: 40px;
 }
