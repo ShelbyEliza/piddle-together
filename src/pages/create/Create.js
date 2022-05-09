@@ -3,7 +3,7 @@ import "./Create.css";
 
 import Select from "react-select";
 import { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { timestamp } from "../../firebase/config";
 import { useCollection } from "../../hooks/useCollection";
 import { useAuthContext } from "../../hooks/useAuthContext";
@@ -21,7 +21,7 @@ export default function Create() {
   const { documents } = useCollection("users");
   const { addDocument, response } = useFirestore("projects");
   const { user } = useAuthContext();
-  const history = useHistory();
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
 
   // form field values:
@@ -80,7 +80,7 @@ export default function Create() {
 
     addDocument(project);
     if (!response.error) {
-      history.push("/");
+      navigate("/");
     } else {
       setFormError(response.error);
     }
