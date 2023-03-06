@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { projectAuth, projectFirestore } from "../firebase/config";
+import { auth, db } from "../firebase/config";
 import { useAuthContext } from "./useAuthContext";
 
 export const useLogin = () => {
@@ -9,18 +9,16 @@ export const useLogin = () => {
   const { dispatch } = useAuthContext();
 
   const login = async (email, password) => {
+    console.log("start of login");
     setError(null);
     setIsPending(true);
 
     try {
       // login
-      const res = await projectAuth.signInWithEmailAndPassword(email, password);
+      const res = await auth.signInWithEmailAndPassword(email, password);
 
       // update online status:
-      await projectFirestore
-        .collection("users")
-        .doc(res.user.uid)
-        .update({ online: true });
+      await db.collection("users").doc(res.user.uid).update({ online: true });
 
       // dispatch login action
       dispatch({ type: "LOGIN", payload: res.user });
@@ -37,9 +35,25 @@ export const useLogin = () => {
     }
   };
 
+  const sendVerificationEmail = async () => {
+    setError(null);
+    setIsPending(true);
+    try {
+      await db.currentUser.sendEmailVerification();
+      // email verification sent
+      // redirect to temp page until email is verified
+      return "Message sent! Please check your email to verify your account!";
+    } catch (err) {
+      if (!isCancelled) {
+        setError(err.message);
+        setIsPending(false);
+      }
+    }
+  };
+
   useEffect(() => {
     return () => setIsCancelled(true);
   }, []);
 
-  return { login, isPending, error };
+  return { login, sendVerificationEmail, isPending, error };
 };

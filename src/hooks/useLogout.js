@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { projectAuth, projectFirestore } from "../firebase/config";
+import { auth, db } from "../firebase/config";
 import { useAuthContext } from "./useAuthContext";
 
 export const useLogout = () => {
@@ -17,15 +17,13 @@ export const useLogout = () => {
       // before signout - update online status
       // only the user can update their own info while logged in
       const { uid } = user;
-      await projectFirestore
-        .collection("users")
-        .doc(uid)
-        .update({ online: false });
+      console.log(uid);
+      await db.collection("users").doc(uid).update({ online: false });
 
-      await projectAuth.signOut();
-
-      // dispatch logout action
-      dispatch({ type: "LOGOUT" });
+      await auth.signOut().then(() => {
+        // dispatch logout action
+        dispatch({ type: "LOGOUT" });
+      });
 
       // update state
       if (!isCancelled) {

@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, projectStorage, db } from "../firebase/config";
+import {
+  auth,
+  projectStorage,
+  db,
+} from "../firebase/config";
 import { useAuthContext } from "./useAuthContext";
 
 export const useSignup = () => {
@@ -10,21 +14,11 @@ export const useSignup = () => {
   const [isPending, setIsPending] = useState(false);
   const { dispatch } = useAuthContext();
 
-  const updateThumbnail = async (res, thumbnail, displayName) => {
-    // after user created with uid upload user avatar:
-    const uploadPath = `thumbnails/${res.user.uid}/${thumbnail.name}`;
-    const img = await projectStorage.ref(uploadPath).put(thumbnail);
-
-    const imgUrl = await img.ref.getDownloadURL();
-
-    await res.user.updateProfile({ displayName, photoURL: imgUrl });
-    return imgUrl;
-  };
+  const updateThumbnail = () => {}
 
   const signup = (email, password, displayName, thumbnail) => {
     setError(null);
     setIsPending(true);
-    console.log("start of signup");
 
     auth
       .createUserWithEmailAndPassword(email, password)
@@ -32,29 +26,42 @@ export const useSignup = () => {
         if (!res) {
           throw new Error("Could not complete signup");
         }
-        console.log("creating a user document");
-        console.log(res);
-        db.collection("users")
-          .doc(res.user.uid)
-          .set({
-            online: true,
-            displayName: displayName,
-            photoURL: updateThumbnail(res, thumbnail),
-          });
-        return res;
+        // after user created with uid upload user avatar:
+        const uploadPath = `thumbnails/${res.user.uid}/${thumbnail.name}`;
+        const img = projectStorage.ref(uploadPath).put(thumbnail);
+        let result;
+        result.img = img;
+        result.res = res;
+        return result;
       })
-      .then((res) => {
-        if (isCancelled) {
+      .then((result) => {
+        const imgUrl = result.img.ref.getDownloadURL();
+        result.imgUrl = imgUrl;
+        return result;
+      })
+      .then((result) => {
+        // add displayName and photoUrl to user
+        result.res.user.updateProfile({ displayName, photoURL: result.imgUrl });
+        return result;
+      })
+      .then((result) => {
+        // create a user document:
+        db.collection("users").doc(result.res.user.uid).set({
+          online: true,
+          displayName,
+          photoURL: result.imgUrl,
+        });
+        return result;
+      })
+      .then((result) => {
+        if (!isCancelled) {
           console.log("Hello");
           setIsPending(false);
           setError(null);
         }
-        console.log("user document has been created");
-      })
-      .then((res) => {
-        console.log("setting logged in context for user");
-        dispatch({ type: "LOGIN", payload: res.user });
-        console.log("logged in context has been set for user");
+        // if (auth.currentUser !== null) {
+        dispatch({ type: "LOGIN", payload: result.res.user });
+        // }
       })
       .then(() => {
         db.currentUser.sendEmailVerification();

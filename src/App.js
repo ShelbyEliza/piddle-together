@@ -15,36 +15,44 @@ import Sidebar from "./components/Sidebar";
 import OnlineUsers from "./components/OnlineUsers";
 
 function App() {
-  const { user, authIsReady } = useAuthContext();
+  const { user, isUserVerified, authIsReady } = useAuthContext();
+  if (user) {
+    // console.log(user);
+  }
 
   return (
     <div className="App">
       {/* wrap in authIsReady so the app doesn't load only links until we determine login status */}
       {authIsReady && (
         <BrowserRouter>
-          {user && <Sidebar />}
+          {isUserVerified && <Sidebar />}
           <div className="container">
             <Navbar />
             <Routes>
               <Route
                 path="/"
-                element={user ? <Dashboard /> : <Navigate to="/login" />}
+                element={
+                  isUserVerified ? <Dashboard /> : <Navigate to="/login" />
+                }
               />
               <Route
                 path="/create"
-                element={user ? user && <Create /> : <Navigate to="/login" />}
+                // element={user ? user && <Create /> : <Navigate to="/login" />}
+                element={isUserVerified ? <Create /> : <Navigate to="/login" />}
               />
               <Route
                 path="/projects/:id"
-                element={user ? <Project /> : <Navigate to="/login" />}
+                element={
+                  isUserVerified ? <Project /> : <Navigate to="/login" />
+                }
               />
               <Route
                 path="/login"
-                element={user ? <Navigate to="/" /> : <Login />}
+                element={isUserVerified ? <Navigate to="/" /> : <Login />}
               />
               <Route
                 path="/signup"
-                element={user ? <Navigate to="/" /> : <Signup />}
+                element={isUserVerified ? <Navigate to="/login" /> : <Signup />}
               />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>

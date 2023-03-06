@@ -10,6 +10,12 @@ export default function Navbar() {
   const { logout, isPending } = useLogout();
   const { user } = useAuthContext();
 
+  const handleLogout = () => {
+    logout().then(() => {
+      console.log("logged out");
+    });
+  };
+
   return (
     <div className="navbar">
       <ul>
@@ -32,7 +38,7 @@ export default function Navbar() {
         {user && (
           <li>
             {!isPending && (
-              <button className="btn" onClick={logout}>
+              <button className="btn" onClick={handleLogout}>
                 Logout
               </button>
             )}
