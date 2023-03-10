@@ -59,8 +59,12 @@ export default function Signup() {
           required
           autoComplete="current-password"
           type="password"
+          pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
           onChange={(e) => setPassword(e.target.value)}
           value={password}
+          minLength="8"
+          maxLength="22"
+          title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
         />
       </label>
       <label>
