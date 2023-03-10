@@ -16,9 +16,6 @@ import OnlineUsers from "./components/OnlineUsers";
 
 function App() {
   const { user, isUserVerified, authIsReady } = useAuthContext();
-  if (user) {
-    // console.log(user);
-  }
 
   return (
     <div className="App">
@@ -37,7 +34,6 @@ function App() {
               />
               <Route
                 path="/create"
-                // element={user ? user && <Create /> : <Navigate to="/login" />}
                 element={isUserVerified ? <Create /> : <Navigate to="/login" />}
               />
               <Route

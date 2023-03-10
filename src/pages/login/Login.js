@@ -16,7 +16,6 @@ export default function Login() {
     e.preventDefault();
     login(email, password);
   };
-
   return (
     <>
       {user === null ? (
@@ -54,7 +53,7 @@ export default function Login() {
         <>
           {user && !user.verifiedEmail && (
             <div className="unverified">
-              <h1>Attention</h1>
+              <h1>Attention, {user.displayName}</h1>
               <p>Please, verify your email before enjoying site content.</p>
               <p>
                 If you would like another verification email sent to you, click

@@ -1,5 +1,15 @@
 import { useReducer, useEffect, useState } from "react";
-import { db, timestamp } from "../firebase/config";
+import { db } from "../firebase/config";
+
+// firebase imports:
+import {
+  collection,
+  doc,
+  addDoc,
+  deleteDoc,
+  updateDoc,
+  Timestamp,
+} from "firebase/firestore";
 
 let initialState = {
   document: null,
@@ -40,12 +50,12 @@ const firestoreReducer = (state, action) => {
   }
 };
 
-export const useFirestore = (collection) => {
+export const useFirestore = (coll) => {
   const [response, dispatch] = useReducer(firestoreReducer, initialState);
   const [isCancelled, setIsCancelled] = useState(false);
 
   // collection ref
-  const ref = db.collection(collection);
+  const ref = collection(db, coll);
 
   // only dispatch is not cancelled
   const dispatchIfNotCancelled = (action) => {
@@ -57,11 +67,8 @@ export const useFirestore = (collection) => {
   // add a document
   const addDocument = async (doc) => {
     dispatch({ type: "IS_PENDING" });
-
     try {
-      console.log(response);
-      const createdAt = timestamp.fromDate(new Date());
-      const addedDocument = await ref.add({ ...doc, createdAt });
+      const addedDocument = await addDoc(ref, { ...doc });
       dispatchIfNotCancelled({
         type: "ADDED_DOCUMENT",
         payload: addedDocument,
@@ -70,13 +77,22 @@ export const useFirestore = (collection) => {
       dispatchIfNotCancelled({ type: "ERROR", payload: err.message });
     }
   };
+  const createTimeStampCurrentTime = async () => {
+    dispatch({ type: "IS_PENDING" });
+    return Timestamp.now();
+  };
+
+  const convertToTimeStamp = async (date) => {
+    dispatch({ type: "IS_PENDING" });
+    return Timestamp.fromDate(date);
+  };
 
   // delete a document
   const deleteDocument = async (id) => {
     dispatch({ type: "IS_PENDING" });
 
     try {
-      await ref.doc(id).delete();
+      await deleteDoc(doc(ref, id));
       dispatchIfNotCancelled({ type: "DELETED_DOCUMENT" });
     } catch (err) {
       dispatchIfNotCancelled({ type: "ERROR", payload: "could not delete" });
@@ -88,7 +104,7 @@ export const useFirestore = (collection) => {
     dispatch({ type: "IS_PENDING" });
 
     try {
-      const updatedDocument = await ref.doc(id).update(updates);
+      const updatedDocument = await updateDoc(doc(ref, id), updates);
 
       dispatchIfNotCancelled({
         type: "UPDATE_DOCUMENT",
@@ -105,5 +121,12 @@ export const useFirestore = (collection) => {
     return () => setIsCancelled(true);
   }, []);
 
-  return { addDocument, deleteDocument, updateDocument, response };
+  return {
+    addDocument,
+    convertToTimeStamp,
+    deleteDocument,
+    updateDocument,
+    createTimeStampCurrentTime,
+    response,
+  };
 };
