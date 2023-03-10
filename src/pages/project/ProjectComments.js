@@ -1,23 +1,24 @@
 import { useState } from "react";
 import Avatar from "../../components/Avatar";
-import { timestamp } from "../../firebase/config";
 import { useAuthContext } from "../../hooks/useAuthContext";
 import { useFirestore } from "../../hooks/useFirestore";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 
 export default function ProjectComments({ project }) {
-  const { updateDocument, response } = useFirestore("projects");
+  const { updateDocument, createTimeStampCurrentTime, response } =
+    useFirestore("projects");
   const [newComment, setNewComment] = useState("");
   const { user } = useAuthContext();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const currentTime = await createTimeStampCurrentTime();
     const commentToAdd = {
       displayName: user.displayName,
       photoURL: user.photoURL,
       content: newComment,
-      createdAt: timestamp.fromDate(new Date()),
+      createdAt: currentTime,
       id: Math.random(),
     };
     await updateDocument(project.id, {

@@ -4,7 +4,6 @@ import "./Create.css";
 import Select from "react-select";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { timestamp } from "../../firebase/config";
 import { useCollection } from "../../hooks/useCollection";
 import { useAuthContext } from "../../hooks/useAuthContext";
 import { useFirestore } from "../../hooks/useFirestore";
@@ -18,11 +17,17 @@ const categories = [
 ];
 
 export default function Create() {
-  const { documents } = useCollection("users");
-  const { addDocument, response } = useFirestore("projects");
-  const { user } = useAuthContext();
   const navigate = useNavigate();
-  const [users, setUsers] = useState([]);
+  const {
+    addDocument,
+    convertToTimeStamp,
+    createTimeStampCurrentTime,
+    response,
+  } = useFirestore("projects");
+  const { user } = useAuthContext();
+  const { documents: usersDocs } = useCollection("users");
+
+  const [assignableUsers, setAssignableUsers] = useState([]);
 
   // form field values:
   const [name, setName] = useState("");
@@ -33,13 +38,13 @@ export default function Create() {
   const [formError, setFormError] = useState(null);
 
   useEffect(() => {
-    if (documents) {
-      const options = documents.map((user) => {
+    if (usersDocs) {
+      const options = usersDocs.map((user) => {
         return { value: user, label: user.displayName };
       });
-      setUsers(options);
+      setAssignableUsers(options);
     }
-  }, [documents]);
+  }, [usersDocs]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,17 +72,19 @@ export default function Create() {
         id: u.value.id,
       };
     });
+    const dateDue = await convertToTimeStamp(new Date(dueDate));
+    const currentTime = await createTimeStampCurrentTime();
 
     const project = {
-      name,
-      details,
+      name: name,
+      details: details,
       category: category,
-      dueDate: timestamp.fromDate(new Date(dueDate)),
+      dueDate: dateDue,
       comments: [],
-      createdBy,
-      assignedUsersList,
+      createdBy: createdBy,
+      createdAt: currentTime,
+      assignedUsersList: assignedUsersList,
     };
-
     addDocument(project);
     if (!response.error) {
       navigate("/");
@@ -127,7 +134,7 @@ export default function Create() {
         <label>
           <span>Assign To:</span>
           <Select
-            options={users}
+            options={assignableUsers}
             onChange={(option) => setAssignedUsers(option)}
             isMulti
           />

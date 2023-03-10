@@ -1,15 +1,19 @@
 import { useState, useEffect } from "react";
-import { projectFirestore } from "../firebase/config";
+import { db } from "../firebase/config";
 
-export const useDocument = (collection, id) => {
+import { collection, doc, onSnapshot } from "firebase/firestore";
+
+export const useDocument = (coll, id) => {
   const [document, setDocument] = useState(null);
   const [error, setError] = useState(null);
 
   // realtime data for document:
   useEffect(() => {
-    const ref = projectFirestore.collection(collection).doc(id);
+    let ref = collection(db, coll);
+    let docRef = doc(ref, id);
 
-    const unsubscribe = ref.onSnapshot(
+    const unsubscribe = onSnapshot(
+      docRef,
       (snapshot) => {
         if (snapshot.data()) {
           setDocument({ ...snapshot.data(), id: snapshot.id });
@@ -25,7 +29,7 @@ export const useDocument = (collection, id) => {
     );
 
     return () => unsubscribe();
-  }, [collection, id]);
+  }, [coll, id]);
 
   return { document, error };
 };
